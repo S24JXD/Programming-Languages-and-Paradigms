@@ -1,0 +1,155 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+
+int main() {
+
+    while (1) {
+        // Hero Initialization
+        struct {
+            char name[20];
+            int health;
+            int damage;
+            int level;
+            float health_multiplier;
+            float damage_multiplier;
+        } hero;
+
+        printf("Choose your hero:\n1. Goku\n2. Vegeta\n3. Gohan\n");
+        char choice[1];
+        printf("Enter the number of your choice: ");
+        scanf("%1s", choice);
+
+        if (choice[0] == '1') {
+            strcpy(hero.name, "Goku");
+            hero.health = 100;
+            hero.damage = 20;
+        } else if (choice[0] == '2') {
+            strcpy(hero.name, "Vegeta");
+            hero.health = 80;
+            hero.damage = 25;
+        } else if (choice[0] == '3') {
+            strcpy(hero.name, "Gohan");
+            hero.health = 90;
+            hero.damage = 22;
+        } else {
+            printf("Invalid choice. Defaulting to Goku.\n");
+            strcpy(hero.name, "Goku");
+            hero.health = 100;
+            hero.damage = 20;
+        }
+
+        hero.level = 1;
+        hero.health_multiplier = 1.5;
+        hero.damage_multiplier = 2;
+
+        struct {
+            int senzu_beans;
+            int dragon_balls;
+        } bag = {5, 3}; // Start with 5 Senzu Beans and 3 Dragon Balls in the bag
+
+        while (hero.health > 0) {
+            // Creature initialization
+            char *creature_names[] = {"Frieza", "Cell", "Majin Buu"};
+            int num_creatures = sizeof(creature_names) / sizeof(creature_names[0]);
+
+            struct {
+                char name[20];
+                int health;
+                int damage;
+                int level;
+                float health_multiplier;
+                float damage_multiplier;
+            } creature;
+
+            int base_health = rand() % (hero.level * 10 + 10 - (hero.level * 10 - 10)) + (hero.level * 10 - 10);
+            int base_damage = rand() % (hero.level * 5 + 5 - (hero.level * 5 - 5)) + (hero.level * 5 - 5);
+            float health_multiplier = 1.5;
+            float damage_multiplier = 1.3;
+
+            strcpy(creature.name, creature_names[rand() % num_creatures]);
+            creature.level = hero.level;
+            creature.health = base_health;
+            creature.damage = base_damage;
+            creature.health_multiplier = health_multiplier;
+            creature.damage_multiplier = damage_multiplier;
+
+            // Battle loop
+            while (hero.health > 0 && creature.health > 0) {
+                // Display stats
+                printf("%s's Health: %d | Damage: %d\n", hero.name, hero.health, hero.damage);
+                printf("%s Health: %d | %s Damage: %d\n", creature.name, creature.health, creature.name, creature.damage);
+
+                // User action
+                char action[20];
+                printf("What will you do? (Type 'attack', 'use_senzu', 'use_dragon_ball', 'access_bag', 'quit' to exit): ");
+                scanf("%19s", action);
+
+                // User actions
+                if (strcmp(action, "attack") == 0) {
+                    creature.health -= hero.damage;
+                    printf("%s attacks %s for %d damage!\n", hero.name, creature.name, hero.damage);
+                } else if (strcmp(action, "use_senzu") == 0) {
+                    if (bag.senzu_beans > 0) {
+                        int healing_amount = hero.health * (hero.health < 75 ? 1.3 : 0.2);
+                        hero.health += healing_amount;
+                        bag.senzu_beans--;
+                        printf("%s used a Senzu Bean and gained %d health! Remaining Senzu Beans: %d\n", hero.name, healing_amount, bag.senzu_beans);
+                    } else {
+                        printf("The bag is empty. You need to find more Senzu Beans!\n");
+                    }
+                } else if (strcmp(action, "use_dragon_ball") == 0) {
+                    if (bag.dragon_balls > 0) {
+                        hero.damage *= 2;
+                        bag.dragon_balls--;
+                        printf("%s used a Dragon Ball and doubled their damage! Remaining Dragon Balls: %d\n", hero.name, bag.dragon_balls);
+                    } else {
+                        printf("The bag is empty. You need to find more Dragon Balls!\n");
+                    }
+                } else if (strcmp(action, "access_bag") == 0) {
+                    printf("Bag Contents:\n");
+                    printf("Senzu Beans: %d\n", bag.senzu_beans);
+                    printf("Dragon Balls: %d\n", bag.dragon_balls);
+                } else if (strcmp(action, "quit") == 0) {
+                    printf("Thanks for playing! Goodbye.\n");
+                    return 0; // Exit the game loop
+                } else if (strcmp(action, "21336069") == 0) {
+                    // Secret code: Set health and damage to 999
+                    hero.health = 999;
+                    hero.damage = 999;
+                    printf("Secret code activated! Health and damage set to 999.\n");
+                } else {
+                    printf("Invalid action. Try again.\n");
+                }
+
+                // Creature's turn
+                hero.health -= creature.damage;
+                printf("%s attacks %s for %d damage!\n", creature.name, hero.name, creature.damage);
+            }
+
+            // Game outcome
+            if (hero.health <= 0) {
+                printf("Game Over. You were defeated.\n");
+            } else {
+                printf("Congratulations! You defeated %s.\n", creature.name);
+                // Level up logic
+                hero.level += 1;
+                printf("%s leveled up to Level %d!\n", hero.name, hero.level);
+                hero.damage = hero.damage + hero.level * hero.damage_multiplier;
+                int regeneration_amount = hero.level * hero.health / 50;
+                hero.health += regeneration_amount;
+                printf("%s regenerated %d health!\n", hero.name, regeneration_amount);
+
+                // Evolution into Super Saiyan at level 5
+                if (hero.level == 5) {
+                    printf("%s has evolved into a Super Saiyan!\n", hero.name);
+                    hero.health *= 2;
+                    hero.damage *= 2;
+                }
+            }
+        }
+    }
+
+    return 0;
+}

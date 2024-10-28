@@ -1,0 +1,144 @@
+import random
+
+def initialize_character():
+    print("Choose your hero:")
+    print("1. Goku")
+    print("2. Vegeta")
+    print("3. Gohan")
+
+    choice = input("Enter the number of your choice: ")
+
+    if choice == '1':
+        return {"name": "Goku", "health": 100, "damage": 20, "level": 1, "bag": {"senzu_beans": 5, "dragon_balls": 3}}
+    elif choice == '2':
+        return {"name": "Vegeta", "health": 80, "damage": 25, "level": 1, "bag": {"senzu_beans": 5, "dragon_balls": 3}}
+    elif choice == '3':
+        return {"name": "Gohan", "health": 90, "damage": 22, "level": 1, "bag": {"senzu_beans": 5, "dragon_balls": 3}}
+    else:
+        print("Invalid choice. Defaulting to Goku.")
+        return {"name": "Goku", "health": 100, "damage": 20, "level": 1, "bag": {"senzu_beans": 5, "dragon_balls": 3}}
+
+def initialize_creature(hero_level):
+    creature_names = ["Frieza", "Cell", "Majin", "Shenron", "Raditz", "Broly", "Nappa", "Dende", "Buu", "Cooler"]
+
+    base_health = random.randint(hero_level * 10 - 10, hero_level * 10 + 10)
+    base_damage = random.randint(hero_level * 5 - 5, hero_level * 5 + 5)
+    health_multiplier = 1.5
+    damage_multiplier = 1.3
+
+    chosen_creature = random.choice(creature_names)
+
+    return {"name": chosen_creature, "level": hero_level, "health": base_health, "damage": base_damage,
+            "health_multiplier": health_multiplier, "damage_multiplier": damage_multiplier}
+
+def use_sb(hero):
+    if hero["bag"]["senzu_beans"] > 0:
+        base_health_multiplier = 0.2
+        health_multiplier = base_health_multiplier
+
+        if hero["health"] < 75:
+            health_multiplier += 1.3  # Increase the multiplier when health is less than 75%
+
+        health_increase = int(hero["health"] * health_multiplier)
+
+        hero["health"] += health_increase
+        hero["bag"]["senzu_beans"] -= 1
+
+        print(hero["name"] + f" used Senzu Beans and gained {health_increase} health!")
+        print("Senzu Beans left in the bag:", hero["bag"]["senzu_beans"], "\n")
+    else:
+        print("No Senzu Beans left in the bag!")
+
+def use_db(hero):
+    if hero["bag"]["dragon_balls"] > 0:
+        damage_multiplier = 2
+        hero["damage"] *= damage_multiplier
+        hero["bag"]["dragon_balls"] -= 1
+
+        print(hero["name"] + f" used a Dragon Ball and doubled their damage!")
+        print("Dragon Balls left in the bag:", hero["bag"]["dragon_balls"], "\n")
+    else:
+        print("No Dragon Balls left in the bag!")
+
+def evolve_into_super_saiyan(hero):
+    if hero["level"] >= 5 and not hero.get("super_saiyan", False):
+        hero["super_saiyan"] = True
+        hero["health"] *= 2
+        hero["damage"] *= 2
+        print(hero["name"] + " has evolved into a Super Saiyan!")
+
+def secret(hero):
+    hero["health"] = 999
+    hero["damage"] = 999
+    print(hero["name"] + " activated the secret code! Health and damage set to 999.\n")
+
+def attack(attacker, target):
+    target["health"] -= attacker["damage"]
+    print(attacker["name"] + " attacks " + target["name"] + " for " + str(attacker["damage"]) + " damage!")
+
+def level_up(entity):
+    entity["level"] += 1
+    entity["health"] += int(entity["health"] * entity["level"] / 50)  # Increase health by level / 50
+
+    damage_multiplier = 2  # Adjust 
+    entity["damage"] = entity["damage"] + int(entity["level"] * damage_multiplier)  # Level * Damage Multiplier * 10
+
+    evolve_into_super_saiyan(entity)
+
+    print("\n" + entity["name"] + " leveled up to Level " + str(entity["level"]) + "!")
+    print(entity["name"] + "'s new stats: Health - " + str(entity["health"]) + " | Damage - " + str(entity["damage"]))
+
+#def regenerate_health(entity):
+ #   entity["health"] += 20
+  #  print(entity["name"] + " regenerated 20 health!")
+
+def display_entity_status(entity):
+    print(entity["name"] + " (Level " + str(entity["level"]) + ") | Health: " + str(entity["health"]) + " | Damage: " + str(entity["damage"]))
+
+def game_loop():
+    while True:
+        hero = initialize_character()
+
+        while hero["health"] > 0:
+            creature = initialize_creature(hero["level"])
+
+            print("\n" + hero["name"] + " (Level " + str(hero["level"]) + ") vs. " +
+                  creature["name"] + " (Level " + str(creature["level"]) + ")")
+
+            while hero["health"] > 0 and creature["health"] > 0:
+                print(hero["name"] + "'s Health: " + str(hero["health"]) + " | Damage: " + str(hero["damage"]))
+                print(creature["name"] + " Health: " + str(creature["health"]) + " | " +
+                      creature["name"] + " Damage: " + str(creature["damage"]))
+                print("\nSenzu Beans in the bag:", hero["bag"]["senzu_beans"])
+                print("Dragon Balls in the bag:", hero["bag"]["dragon_balls"])
+
+                action = input("\nWhat will you do? (Type 'attack', 'use_sb', 'use_db', 'open_bag', 'quit' to exit): ")
+
+                # Check for the secret code in the background
+                if action == '21336069':
+                    secret(hero)
+                elif action == 'attack':
+                    attack(hero, creature)
+                elif action == 'use_sb':
+                    use_sb(hero)
+                elif action == 'use_db':
+                    use_db(hero)
+                elif action == 'open_bag':
+                  print("Senzu Beans in the bag:", hero["bag"]["senzu_beans"])
+                  print("Dragon Balls in the bag:", hero["bag"]["dragon_balls"], "\n")
+                elif action == 'quit':
+                    print("Thanks for playing! Goodbye.")
+                    return  # Exit the game loop
+                else:
+                    print("Invalid action. Try again.")
+
+                attack(creature, hero)
+
+            if hero["health"] <= 0:
+                print("Game Over. You were defeated.")
+            else:
+                print("Congratulations! You defeated the " + creature["name"] + ".")
+                level_up(hero)
+
+# Start the game
+game_loop()
